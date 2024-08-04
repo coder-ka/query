@@ -1,3 +1,3 @@
-export function add(a: number, b: number) {
-  return a + b;
-}
+export type { Entity } from "./schema";
+export type { Tablish } from "./query";
+export { from } from "./query";
