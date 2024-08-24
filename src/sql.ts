@@ -4,6 +4,7 @@ import {
   Columns,
   eqSymbol,
   isColumn,
+  isPlaceholder,
   isQuery,
   isTable,
   Joins,
@@ -98,7 +99,10 @@ function toSqlPredicate(predicate: Predicate): string {
 function toSqlTerm(term: Term): string {
   if (isColumn(term)) {
     return columnRef(term);
-  } else {
+  } else if (isPlaceholder(term)) {
+    return "?";
+  }
+  {
     return "" as never;
   }
 }

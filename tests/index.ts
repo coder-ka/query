@@ -1,16 +1,16 @@
 import assert from "assert";
-import { from, And, AsObject, Eq, toSql, asObject, AsRow } from "../src/main";
+import { from, AsObject, eq, toSql, asObject, AsRow } from "../src/main";
 import { Todo, User } from "./test-db/schema";
 import mysql from "mysql2/promise";
 import { test } from "./util";
 import { uuidv7 } from "uuidv7";
 
 const selectQuery = from(User)
-  .innerJoin("todos", Todo, (u, t) => Eq(u.id, t.author_id))
+  .innerJoin("todos", Todo, (u, t) => eq(u.id, t.author_id))
   .innerJoin(
     "todos2",
     from(Todo)
-      .innerJoin("author", User, (t, u) => Eq(t.author_id, u.id))
+      .innerJoin("author", User, (t, u) => eq(t.author_id, u.id))
       .select((x) => ({
         id: x.id,
         author: {
@@ -18,9 +18,9 @@ const selectQuery = from(User)
           first_name: x.author.first_name,
         },
       })),
-    (u, t) => Eq(u.id, t.author.id)
+    (u, t) => eq(u.id, t.author.id)
   )
-  .where(And([]))
+  .where((x, p) => eq(x.first_name, p("田中")))
   .select((x) => ({
     id: x.id,
     todos: {
@@ -96,7 +96,8 @@ Promise.all([
       await connection.commit();
 
       const sql = toSql(selectQuery);
-      const [rows] = await connection.query(sql);
+      const prepared = await connection.prepare(sql);
+      const [rows] = await prepared.execute(selectQuery.params);
       const row1 = rows[0];
       assert.deepStrictEqual(row1, {
         id: userId,

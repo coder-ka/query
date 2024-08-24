@@ -10,6 +10,16 @@ export function isScalar(x: unknown): x is Scalar {
   );
 }
 
+export type Term = Column | Placeholder;
+const placholderSymbol = Symbol("placeholder");
+export function isPlaceholder(x: unknown): x is Placeholder {
+  return typeof x === "object" && x !== null && placholderSymbol in x;
+}
+export type Placeholder = {
+  [placholderSymbol]: true;
+  value: Scalar;
+};
+
 export type Tablish<T> = {
   alias: string | null;
   columns: Columns<T>;
@@ -85,14 +95,12 @@ export type Join<TLeft, TRight> = {
   joinType: JoinType;
 };
 
-export type Term = Column;
-
 export const andSymbol = Symbol("and");
 export type And = {
   type: typeof andSymbol;
   predicates: Predicate[];
 };
-export function And(predicates: Predicate[]): And {
+export function and(predicates: Predicate[]): And {
   return {
     type: andSymbol,
     predicates,
@@ -104,7 +112,7 @@ export type Or = {
   type: typeof orSymbol;
   predicates: Predicate[];
 };
-export function Or(predicates: Predicate[]): Or {
+export function or(predicates: Predicate[]): Or {
   return {
     type: orSymbol,
     predicates,
@@ -117,7 +125,7 @@ export type Eq<TTermLeft extends Term, TTermRight extends Term> = {
   left: TTermLeft;
   right: TTermRight;
 };
-export function Eq<TTermLeft extends Term, TTermRight extends Term>(
+export function eq<TTermLeft extends Term, TTermRight extends Term>(
   left: TTermLeft,
   right: TTermRight
 ): Eq<TTermLeft, TTermRight> {
@@ -131,7 +139,7 @@ export function Eq<TTermLeft extends Term, TTermRight extends Term>(
 export type Predicate = And | Or | Eq<Term, Term>;
 
 export function from<T>(tablish: Tablish<T>) {
-  return createQuery(tablish, tablish.columns, {}, And([]));
+  return createQuery(tablish, tablish.columns, {}, and([]));
 }
 
 type SortItem = { column: Column; order?: "ASC" | "DESC" };
@@ -143,6 +151,7 @@ export type Query<
   TJoins extends Joins<string, TFrom, unknown>
 > = Tablish<TSelected> & {
   [querySymbol]: true;
+  params: Scalar[];
   from: Tablish<TFrom>;
   as(name: string): Query<TFrom, TSelected, TJoins>;
   select<TNextColumns extends Columns<unknown>>(
@@ -150,7 +159,12 @@ export type Query<
   ): Query<TFrom, UnwrapColumns<TNextColumns>, TJoins>;
   joins: TJoins;
   predicate: Predicate;
-  where(predicate2: Predicate): Query<TFrom, TSelected, TJoins>;
+  where(
+    predicateFn: (
+      x: AllColumns<TFrom, TJoins>,
+      p: (x: Scalar) => Placeholder
+    ) => Predicate
+  ): Query<TFrom, TSelected, TJoins>;
   join<TName extends string, TRight>(
     name: TName,
     right: Tablish<TRight>,
@@ -204,15 +218,26 @@ export function createQuery<
   predicate: Predicate,
   alias: string | null = null,
   limitCount: number | null = null,
-  sort: SortItem[] = []
+  sort: SortItem[] = [],
+  params: Scalar[] = []
 ): Query<TFrom, TSelected, TJoins> {
   return {
     [querySymbol]: true,
+    params,
     from,
     columns,
     alias,
     as(alias: string) {
-      return createQuery(from, columns, joins, predicate, alias);
+      return createQuery(
+        from,
+        columns,
+        joins,
+        predicate,
+        alias,
+        limitCount,
+        sort,
+        params
+      );
     },
     select<TNextColumns extends Columns<any>>(
       mapper: (x: Columns<TSelected>) => TNextColumns
@@ -221,12 +246,39 @@ export function createQuery<
         from,
         mapper(columns),
         joins,
-        predicate
+        predicate,
+        alias,
+        limitCount,
+        sort,
+        params
       );
     },
     predicate,
-    where(predicate2: Predicate) {
-      return createQuery(from, columns, joins, And([predicate, predicate2]));
+    where(predicateFn) {
+      const params: Scalar[] = [];
+      function placeholder(value: Scalar): Placeholder {
+        params.push(value);
+        return {
+          [placholderSymbol]: true,
+          value,
+        };
+      }
+
+      const nextPredicate = and([
+        predicate,
+        predicateFn(allColumns(from, joins), placeholder),
+      ]);
+
+      return createQuery(
+        from,
+        columns,
+        joins,
+        nextPredicate,
+        alias,
+        limitCount,
+        sort,
+        params
+      );
     },
     joins,
     join<TName extends string, TRight>(
@@ -287,7 +339,11 @@ export function createQuery<
             joinType,
           },
         },
-        predicate
+        predicate,
+        alias,
+        limitCount,
+        sort,
+        params
       );
     },
     innerJoin<TName extends string, TRight>(
@@ -306,7 +362,16 @@ export function createQuery<
     },
     limitCount,
     limit(count: number) {
-      return createQuery(from, columns, joins, predicate, alias, count);
+      return createQuery(
+        from,
+        columns,
+        joins,
+        predicate,
+        alias,
+        count,
+        sort,
+        params
+      );
     },
     sort,
     orderBy(createSort: (x: AllColumns<TFrom, TJoins>) => SortItem[]) {
@@ -317,7 +382,8 @@ export function createQuery<
         predicate,
         alias,
         limitCount,
-        createSort(allColumns(from, joins))
+        createSort(allColumns(from, joins)),
+        params
       );
     },
   };
