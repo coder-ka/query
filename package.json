@@ -37,6 +37,7 @@
   },
   "homepage": "https://github.com/coder-ka/esbuild-ts-lib-starter#readme",
   "devDependencies": {
+    "@coder-ka/prisma-query": "^1.0.0",
     "@types/assert": "^1.5.10",
     "assert": "^2.1.0",
     "concurrently": "^8.2.2",
@@ -46,8 +47,5 @@
     "tsx": "^4.9.3",
     "typescript": "^5.4.5",
     "uuidv7": "^1.0.1"
-  },
-  "dependencies": {
-    "@coder-ka/prisma-query": "^1.0.0"
   }
 }
