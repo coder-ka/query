@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "main.cjs",
+  "bin": "./dist/bin.cjs",
   "types": "./types/main.d.ts",
   "exports": {
     ".": {
@@ -20,7 +21,9 @@
     "build:node": "tsc && npm run build:node:esm && npm run build:node:cjs",
     "watch": "concurrently \"tsc --watch\" \"npm run build:esm -- --watch\" \"npm run build:cjs -- --watch\"",
     "watch:node": "concurrently \"tsc --watch\" \"npm run build:node:esm -- --watch\" \"npm run build:node:cjs -- --watch\"",
-    "test": "tsx tests"
+    "test": "tsx tests",
+    "migrate:test-db": "prisma migrate dev -n init --schema=./tests/test-db/schema.prisma",
+    "generate:test-db-client": "prisma generate --schema=./tests/test-db/schema.prisma"
   },
   "repository": {
     "type": "git",
@@ -38,7 +41,13 @@
     "assert": "^2.1.0",
     "concurrently": "^8.2.2",
     "esbuild": "^0.20.2",
+    "mysql2": "^3.11.0",
+    "prisma": "^5.17.0",
     "tsx": "^4.9.3",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "uuidv7": "^1.0.1"
+  },
+  "dependencies": {
+    "@coder-ka/prisma-query": "^1.0.0"
   }
 }

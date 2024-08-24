@@ -1,3 +1,2 @@
-export type { Entity } from "./schema";
-export type { Tablish } from "./query";
-export { from } from "./query";
+export * from "./query";
+export * from "./sql";
