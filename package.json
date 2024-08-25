@@ -1,6 +1,6 @@
 {
   "name": "@coder-ka/query",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "",
   "main": "./dist/main.cjs",
   "types": "./types/main.d.ts",
@@ -43,6 +43,7 @@
   "devDependencies": {
     "@coder-ka/prisma-query": "^1.0.0",
     "@types/assert": "^1.5.10",
+    "@types/node": "^22.5.0",
     "assert": "^2.1.0",
     "concurrently": "^8.2.2",
     "esbuild": "^0.20.2",
