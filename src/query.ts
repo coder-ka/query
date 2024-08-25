@@ -452,6 +452,7 @@ export function asObject<TQuery extends Query<any, any, any>>(
       if (isColumn(x)) {
         return {
           ...acc,
+          // @ts-ignore
           [key]: row[`${parent}${key}`],
         };
       } else {

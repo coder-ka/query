@@ -1,9 +1,8 @@
 {
   "name": "@coder-ka/query",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
-  "main": "main.cjs",
-  "bin": "./dist/bin.cjs",
+  "main": "./dist/main.cjs",
   "types": "./types/main.d.ts",
   "exports": {
     ".": {
