@@ -1,6 +1,6 @@
 {
   "name": "@coder-ka/query",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "",
   "main": "./dist/main.cjs",
   "types": "./types/main.d.ts",

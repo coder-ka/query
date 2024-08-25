@@ -168,7 +168,7 @@ export type Query<
   join<TName extends string, TRight>(
     name: TName,
     right: Tablish<TRight>,
-    on: (left: Columns<TFrom>, right: Columns<TRight>) => Predicate,
+    on: (left: AllColumns<TFrom, TJoins>, right: Columns<TRight>) => Predicate,
     joinType: JoinType
   ): Query<
     TFrom,
@@ -284,7 +284,10 @@ export function createQuery<
     join<TName extends string, TRight>(
       name: TName,
       right: Tablish<TRight>,
-      on: (left: Columns<TFrom>, right: Columns<TRight>) => Predicate,
+      on: (
+        left: AllColumns<TFrom, TJoins>,
+        right: Columns<TRight>
+      ) => Predicate,
       joinType: JoinType = "inner"
     ) {
       function setColumnContext<T>(
@@ -335,7 +338,7 @@ export function createQuery<
             left: from,
             right,
             rightAliased,
-            on: on(from.columns, rightAliased.columns),
+            on: on(allColumns(from, joins), rightAliased.columns),
             joinType,
           },
         },
