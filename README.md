@@ -72,8 +72,8 @@ This library is just a SQL builder for row-origented-database like RDB.
 - This library is agnostic about which client is used. For example, the `TOP` clause and the `LIMIT` clause can be treated as having the same meaning, but methods for each syntax will be implemented separately.
 - This library is not an ORM, so features like relations or associations will not be implemented. Either `innerJoin` or `leftJoin` gathers entities, and `asObject` creates a nested object. That should be sufficient for most use cases.
 
-## Loadmap
+## Roadmap
 
-Currently this library is for a **PERSONAL USE** and is **NOT GUARANTEED TO BE MANTAINANCED**.
+Currently this library is for **PERSONAL USE** and is **NOT GUARANTEED TO BE MANTAINANCED**.
 
 There is no specific roadmap at the moment, and some core features, such as functions and the LIKE clause, are not implemented yet.
