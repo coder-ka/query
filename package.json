@@ -1,7 +1,7 @@
 {
   "name": "@coder-ka/query",
-  "version": "1.0.6",
-  "description": "",
+  "version": "1.0.7",
+  "description": "A schema-based, strongly-typed SQL builder.",
   "main": "./dist/main.cjs",
   "types": "./types/main.d.ts",
   "exports": {

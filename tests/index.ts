@@ -46,7 +46,7 @@ Promise.all([
   test("mysql connection.").do(async () => {
     const connection = await mysql.createConnection({
       host: "localhost",
-      port: 53309,
+      port: 53310,
       user: "root",
       password: "example",
       database: "coder-ka-query_test",
