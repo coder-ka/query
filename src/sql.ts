@@ -14,16 +14,21 @@ import {
   Term,
 } from "./query";
 
+export type ToSqlOptions = {
+  useBackquoteForColumnNames?: boolean;
+};
+
 export function toSql<TQuery extends Query<any, any, Joins>>(
-  query: TQuery
+  query: TQuery,
+  options: ToSqlOptions = {}
 ): string {
   return `
-  SELECT ${sqlSelectedColumns(query.columns).join(",")}
+  SELECT ${sqlSelectedColumns(query.columns, options).join(",")}
   FROM ${
     isTable(query.from)
       ? query.from.name
       : isQuery(query.from)
-      ? `(${toSql(query.from)})${
+      ? `(${toSql(query.from, options)})${
           query.from.alias === null ? "" : ` as ${query.from.alias}`
         }`
       : ("" as never)
@@ -35,17 +40,17 @@ export function toSql<TQuery extends Query<any, any, Joins>>(
         isTable(join.right)
           ? `${join.right.name} as ${joinName}`
           : isQuery(join.right)
-          ? `(${toSql(join.right)}) as ${joinName}`
+          ? `(${toSql(join.right, options)}) as ${joinName}`
           : ("" as never)
-      } ON ${toSqlPredicate(join.on)}`;
+      } ON ${toSqlPredicate(join.on, options)}`;
     })
-    .join("\n")} ${toSqlWhere(query.predicate)}${
+    .join("\n")} ${toSqlWhere(query.predicate, options)}${
     query.sort.length === 0
       ? ""
       : ` ORDER BY ${query.sort
           .map(
             (x) =>
-              `${columnRef(x.column)}${
+              `${columnRef(x.column, options)}${
                 x.order === undefined ? "" : ` ${x.order}`
               }`
           )
@@ -55,50 +60,55 @@ export function toSql<TQuery extends Query<any, any, Joins>>(
 
 function sqlSelectedColumns<T>(
   columns: Columns<T>,
+  options: ToSqlOptions,
   parentName?: string
 ): string[] {
   return Object.keys(columns).flatMap((alias) => {
     const x = columns[alias as keyof typeof columns] as unknown;
     if (isColumn(x)) {
       return [
-        `${columnRef(x)} as '${
+        `${columnRef(x, options)} as '${
           parentName === undefined ? "" : `${parentName}.`
         }${alias}'`,
       ];
     } else {
       return sqlSelectedColumns(
         x as Columns<unknown>,
+        options,
         parentName === undefined ? alias : `${parentName}.${alias}`
       );
     }
   });
 }
 
-function toSqlWhere(predicate: Predicate): string {
-  const predicateSql = toSqlPredicate(predicate);
+function toSqlWhere(predicate: Predicate, options: ToSqlOptions): string {
+  const predicateSql = toSqlPredicate(predicate, options);
   return predicateSql === "" ? "" : `WHERE ${predicateSql}`;
 }
 
-function toSqlPredicate(predicate: Predicate): string {
+function toSqlPredicate(predicate: Predicate, options: ToSqlOptions): string {
   if (predicate.type === andSymbol) {
     const conditions = predicate.predicates
-      .map(toSqlPredicate)
+      .map((x) => toSqlPredicate(x, options))
       .filter((x) => x !== "");
     return conditions.length === 0 ? "" : `(${conditions.join(" AND ")})`;
   } else if (predicate.type === orSymbol) {
     const conditions = predicate.predicates
-      .map(toSqlPredicate)
+      .map((x) => toSqlPredicate(x, options))
       .filter((x) => x !== "");
     return conditions.length === 0 ? "" : `(${conditions.join(" OR ")})`;
   } else if (predicate.type === eqSymbol) {
-    return `${toSqlTerm(predicate.left)} = ${toSqlTerm(predicate.right)}`;
+    return `${toSqlTerm(predicate.left, options)} = ${toSqlTerm(
+      predicate.right,
+      options
+    )}`;
   }
   return "";
 }
 
-function toSqlTerm(term: Term): string {
+function toSqlTerm(term: Term, options: ToSqlOptions): string {
   if (isColumn(term)) {
-    return columnRef(term);
+    return columnRef(term, options);
   } else if (isPlaceholder(term)) {
     return "?";
   }
@@ -107,9 +117,10 @@ function toSqlTerm(term: Term): string {
   }
 }
 
-function columnRef<T>(column: Column<T>): string {
-  return `${column.context[0]}.\`${column.context
+function columnRef<T>(column: Column<T>, options: ToSqlOptions): string {
+  const quote = options.useBackquoteForColumnNames ? "`" : '"';
+  return `${column.context[0]}.${quote}${column.context
     .slice(1)
     .map((x) => `${x}.`)
-    .join("")}${column.name}\``;
+    .join("")}${column.name}${quote}`;
 }

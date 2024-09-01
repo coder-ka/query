@@ -95,7 +95,9 @@ Promise.all([
 
       await connection.commit();
 
-      const sql = toSql(selectQuery);
+      const sql = toSql(selectQuery, {
+        useBackquoteForColumnNames: true,
+      });
       const prepared = await connection.prepare(sql);
       const [rows] = await prepared.execute(selectQuery.params);
       const row1 = rows[0];
