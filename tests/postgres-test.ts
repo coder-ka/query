@@ -63,9 +63,8 @@ export default [
 
       await client.query("COMMIT");
 
-      let i = 0;
       const sql = toSql(selectQuery, {
-        createPlaceholder: () => `$${++i}`,
+        createPlaceholder: (i) => `$${i}`,
       });
       const { rows } = await client.query(sql, selectQuery.params);
       const row1 = rows[0];

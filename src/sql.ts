@@ -16,12 +16,31 @@ import {
 
 export type ToSqlOptions = {
   useBackquoteForColumnNames?: boolean;
-  createPlaceholder?(): string;
+  createPlaceholder?(i: number): string;
+};
+
+type ToSqlOptionsInternal = {
+  useBackquoteForColumnNames?: boolean;
+  createPlaceholder(): string;
 };
 
 export function toSql<TQuery extends Query<any, any, Joins>>(
   query: TQuery,
   options: ToSqlOptions = {}
+): string {
+  let i = 0;
+  return toSqlTablish(query, {
+    ...options,
+    createPlaceholder: () => {
+      i++;
+      return options.createPlaceholder ? options.createPlaceholder(i) : "?";
+    },
+  });
+}
+
+function toSqlTablish<TQuery extends Query<any, any, Joins>>(
+  query: TQuery,
+  options: ToSqlOptionsInternal
 ): string {
   return `
   SELECT ${sqlSelectedColumns(query.columns, options).join(",")}
@@ -29,7 +48,7 @@ export function toSql<TQuery extends Query<any, any, Joins>>(
     isTable(query.from)
       ? query.from.name
       : isQuery(query.from)
-      ? `(${toSql(query.from, options)})${
+      ? `(${toSqlTablish(query.from, options)})${
           query.from.alias === null ? "" : ` as ${query.from.alias}`
         }`
       : ("" as never)
@@ -41,7 +60,7 @@ export function toSql<TQuery extends Query<any, any, Joins>>(
         isTable(join.right)
           ? `${join.right.name} as ${joinName}`
           : isQuery(join.right)
-          ? `(${toSql(join.right, options)}) as ${joinName}`
+          ? `(${toSqlTablish(join.right, options)}) as ${joinName}`
           : ("" as never)
       } ON ${toSqlPredicate(join.on, options)}`;
     })
@@ -61,7 +80,7 @@ export function toSql<TQuery extends Query<any, any, Joins>>(
 
 function sqlSelectedColumns<T>(
   columns: Columns<T>,
-  options: ToSqlOptions,
+  options: ToSqlOptionsInternal,
   parentName?: string
 ): string[] {
   return Object.keys(columns).flatMap((alias) => {
@@ -82,12 +101,18 @@ function sqlSelectedColumns<T>(
   });
 }
 
-function toSqlWhere(predicate: Predicate, options: ToSqlOptions): string {
+function toSqlWhere(
+  predicate: Predicate,
+  options: ToSqlOptionsInternal
+): string {
   const predicateSql = toSqlPredicate(predicate, options);
   return predicateSql === "" ? "" : `WHERE ${predicateSql}`;
 }
 
-function toSqlPredicate(predicate: Predicate, options: ToSqlOptions): string {
+function toSqlPredicate(
+  predicate: Predicate,
+  options: ToSqlOptionsInternal
+): string {
   if (predicate.type === andSymbol) {
     const conditions = predicate.predicates
       .map((x) => toSqlPredicate(x, options))
@@ -107,18 +132,21 @@ function toSqlPredicate(predicate: Predicate, options: ToSqlOptions): string {
   return "";
 }
 
-function toSqlTerm(term: Term, options: ToSqlOptions): string {
+function toSqlTerm(term: Term, options: ToSqlOptionsInternal): string {
   if (isColumn(term)) {
     return columnRef(term, options);
   } else if (isPlaceholder(term)) {
-    return options.createPlaceholder ? options.createPlaceholder() : "?";
+    return options.createPlaceholder();
   }
   {
     return "" as never;
   }
 }
 
-function columnRef<T>(column: Column<T>, options: ToSqlOptions): string {
+function columnRef<T>(
+  column: Column<T>,
+  options: ToSqlOptionsInternal
+): string {
   const quote = options.useBackquoteForColumnNames ? "`" : '"';
   return `${column.context[0]}.${quote}${column.context
     .slice(1)
