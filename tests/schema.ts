@@ -1,6 +1,6 @@
 import { column, table } from "../src/main";
 
-export type accounts = {
+export type Account = {
   id: string;
   first_name: string;
   last_name: string;
@@ -9,7 +9,6 @@ export type accounts = {
 };
 export const accounts = table(
   "accounts",
-  null,
   {
     id: column<string>('id', ['accounts']),
     first_name: column<string>('first_name', ['accounts']),
@@ -19,7 +18,7 @@ export const accounts = table(
   },
 );
 
-export type todos = {
+export type Todo = {
   id: string;
   title: string;
   author_id: string;
@@ -27,7 +26,6 @@ export type todos = {
 };
 export const todos = table(
   "todos",
-  null,
   {
     id: column<string>('id', ['todos']),
     title: column<string>('title', ['todos']),

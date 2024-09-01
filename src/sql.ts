@@ -29,7 +29,7 @@ export function toSql<TQuery extends Query<any, any, Joins>>(
   options: ToSqlOptions = {}
 ): string {
   let i = 0;
-  return toSqlTablish(query, {
+  return toSqlQuery(query, {
     ...options,
     createPlaceholder: () => {
       i++;
@@ -38,7 +38,7 @@ export function toSql<TQuery extends Query<any, any, Joins>>(
   });
 }
 
-function toSqlTablish<TQuery extends Query<any, any, Joins>>(
+function toSqlQuery<TQuery extends Query<any, any, Joins>>(
   query: TQuery,
   options: ToSqlOptionsInternal
 ): string {
@@ -48,7 +48,7 @@ function toSqlTablish<TQuery extends Query<any, any, Joins>>(
     isTable(query.from)
       ? query.from.name
       : isQuery(query.from)
-      ? `(${toSqlTablish(query.from, options)})${
+      ? `(${toSqlQuery(query.from, options)})${
           query.from.alias === null ? "" : ` as ${query.from.alias}`
         }`
       : ("" as never)
@@ -60,7 +60,7 @@ function toSqlTablish<TQuery extends Query<any, any, Joins>>(
         isTable(join.right)
           ? `${join.right.name} as ${joinName}`
           : isQuery(join.right)
-          ? `(${toSqlTablish(join.right, options)}) as ${joinName}`
+          ? `(${toSqlQuery(join.right, options)}) as ${joinName}`
           : ("" as never)
       } ON ${toSqlPredicate(join.on, options)}`;
     })

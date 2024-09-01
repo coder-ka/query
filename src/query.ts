@@ -29,11 +29,9 @@ const tableSymbol = Symbol("table");
 export type Table<T> = Tablish<T> & {
   [tableSymbol]: true;
   name: string;
-  dbName: string | null;
 };
 export function table<T>(
   name: string,
-  dbName: string | null,
   columns: Columns<T>,
   alias: string | null = null
 ): Table<T> {
@@ -42,9 +40,8 @@ export function table<T>(
     name,
     alias,
     as(alias) {
-      return table(name, dbName, columns, alias);
+      return table(name, columns, alias);
     },
-    dbName,
     columns,
   };
 }

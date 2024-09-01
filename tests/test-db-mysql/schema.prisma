@@ -15,19 +15,23 @@ datasource db {
     url      = env("DATABASE_URL_MYSQL")
 }
 
-model accounts {
+model Account {
     id          String   @id
     first_name  String
     last_name   String
     age         Int
-    todos       todos[]
+    todos       Todo[]
     modified_at DateTime
+
+    @@map("accounts")
 }
 
-model todos {
+model Todo {
     id          String   @id
     title       String
     author_id   String
-    author      accounts @relation(fields: [author_id], references: [id])
+    author      Account  @relation(fields: [author_id], references: [id])
     modified_at DateTime
+
+    @@map("todos")
 }
