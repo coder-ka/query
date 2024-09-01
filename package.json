@@ -1,6 +1,6 @@
 {
   "name": "@coder-ka/query",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "A schema-based, strongly-typed SQL builder.",
   "main": "./dist/main.cjs",
   "types": "./types/main.d.ts",
@@ -26,8 +26,12 @@
     "watch": "concurrently \"tsc --watch\" \"npm run build:esm -- --watch\" \"npm run build:cjs -- --watch\"",
     "watch:node": "concurrently \"tsc --watch\" \"npm run build:node:esm -- --watch\" \"npm run build:node:cjs -- --watch\"",
     "test": "tsx tests",
-    "migrate:test-db": "prisma migrate dev -n init --schema=./tests/test-db/schema.prisma",
-    "generate:test-db-client": "prisma generate --schema=./tests/test-db/schema.prisma"
+    "migrate:test-db": "npm run migrate:test-db-mysql && npm run migrate:test-db-postgres",
+    "generate:test-db-client": "npm run generate:test-db-client-mysql && npm run generate:test-db-client-postgres",
+    "migrate:test-db-mysql": "prisma db push --schema=./tests/test-db-mysql/schema.prisma",
+    "generate:test-db-client-mysql": "prisma generate --schema=./tests/test-db-mysql/schema.prisma",
+    "migrate:test-db-postgres": "prisma db push --schema=./tests/test-db-postgres/schema.prisma",
+    "generate:test-db-client-postgres": "prisma generate --schema=./tests/test-db-postgres/schema.prisma"
   },
   "repository": {
     "type": "git",
@@ -44,10 +48,12 @@
     "@coder-ka/prisma-query": "^1.0.0",
     "@types/assert": "^1.5.10",
     "@types/node": "^22.5.0",
+    "@types/pg": "^8.11.8",
     "assert": "^2.1.0",
     "concurrently": "^8.2.2",
     "esbuild": "^0.20.2",
     "mysql2": "^3.11.0",
+    "pg": "^8.12.0",
     "prisma": "^5.17.0",
     "tsx": "^4.9.3",
     "typescript": "^5.4.5",

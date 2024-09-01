@@ -16,6 +16,7 @@ import {
 
 export type ToSqlOptions = {
   useBackquoteForColumnNames?: boolean;
+  createPlaceholder?(): string;
 };
 
 export function toSql<TQuery extends Query<any, any, Joins>>(
@@ -67,9 +68,9 @@ function sqlSelectedColumns<T>(
     const x = columns[alias as keyof typeof columns] as unknown;
     if (isColumn(x)) {
       return [
-        `${columnRef(x, options)} as '${
+        `${columnRef(x, options)} as "${
           parentName === undefined ? "" : `${parentName}.`
-        }${alias}'`,
+        }${alias}"`,
       ];
     } else {
       return sqlSelectedColumns(
@@ -110,7 +111,7 @@ function toSqlTerm(term: Term, options: ToSqlOptions): string {
   if (isColumn(term)) {
     return columnRef(term, options);
   } else if (isPlaceholder(term)) {
-    return "?";
+    return options.createPlaceholder ? options.createPlaceholder() : "?";
   }
   {
     return "" as never;
