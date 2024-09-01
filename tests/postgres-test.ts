@@ -1,5 +1,5 @@
 import assert from "assert";
-import { toSql } from "../src/main";
+import { postgresqlToSqlOptions, toSql } from "../src/main";
 import pg from "pg";
 import { test } from "./util";
 import { uuidv7 } from "uuidv7";
@@ -63,9 +63,7 @@ export default [
 
       await client.query("COMMIT");
 
-      const sql = toSql(selectQuery, {
-        createPlaceholder: (i) => `$${i}`,
-      });
+      const sql = toSql(selectQuery, postgresqlToSqlOptions);
       const { rows } = await client.query(sql, selectQuery.params);
       const row1 = rows[0];
       assert.deepStrictEqual(row1, {

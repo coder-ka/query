@@ -1,5 +1,5 @@
 import assert from "assert";
-import { toSql } from "../src/main";
+import { mysqlToSqlOptions, toSql } from "../src/main";
 import mysql from "mysql2/promise";
 import { test } from "./util";
 import { uuidv7 } from "uuidv7";
@@ -58,9 +58,7 @@ export default [
 
       await connection.commit();
 
-      const sql = toSql(selectQuery, {
-        useBackquoteForColumnNames: true,
-      });
+      const sql = toSql(selectQuery, mysqlToSqlOptions);
       const prepared = await connection.prepare(sql);
       const [rows] = await prepared.execute(selectQuery.params);
       const row1 = rows[0];

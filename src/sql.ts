@@ -19,6 +19,13 @@ export type ToSqlOptions = {
   createPlaceholder?(i: number): string;
 };
 
+export const mysqlToSqlOptions: ToSqlOptions = {
+  useBackquoteForColumnNames: true,
+};
+export const postgresqlToSqlOptions: ToSqlOptions = {
+  createPlaceholder: (i) => `$${i}`,
+};
+
 type ToSqlOptionsInternal = {
   useBackquoteForColumnNames?: boolean;
   createPlaceholder(): string;
