@@ -61,15 +61,20 @@ function toSqlQuery<TQuery extends Query<any, any, Joins>>(
       : ("" as never)
   }
   ${Object.keys(query.joins)
-    .map((joinName) => {
+    .flatMap((joinName) => {
       const join = query.joins[joinName as keyof typeof query.joins];
-      return `${join.joinType.toUpperCase()} JOIN ${
-        isTable(join.right)
-          ? `${join.right.name} as ${joinName}`
-          : isQuery(join.right)
-          ? `(${toSqlQuery(join.right, options)}) as ${joinName}`
-          : ("" as never)
-      } ON ${toSqlPredicate(join.on, options)}`;
+
+      if (join === undefined) return [];
+
+      return [
+        `${join.joinType.toUpperCase()} JOIN ${
+          isTable(join.right)
+            ? `${join.right.name} as ${joinName}`
+            : isQuery(join.right)
+            ? `(${toSqlQuery(join.right, options)}) as ${joinName}`
+            : ("" as never)
+        } ON ${toSqlPredicate(join.on, options)}`,
+      ];
     })
     .join("\n")} ${toSqlWhere(query.predicate, options)}${
     query.sort.length === 0
@@ -92,6 +97,9 @@ function sqlSelectedColumns<T>(
 ): string[] {
   return Object.keys(columns).flatMap((alias) => {
     const x = columns[alias as keyof typeof columns] as unknown;
+
+    if (x === undefined) return [];
+
     if (isColumn(x)) {
       return [
         `${columnRef(x, options)} as "${

@@ -72,13 +72,17 @@ export type Columns<T> = {
     ? Columns<T[p]>
     : Column<T[p]>;
 };
-type UnwrapColumns<T extends Columns<unknown>> = {
+type KeysMatching<T, V> = {
+  [K in keyof T]: T[K] extends V ? K : never;
+}[keyof T];
+type OmitUndefined<T> = Omit<T, KeysMatching<T, undefined>>;
+type UnwrapColumns<T extends Columns<unknown>> = OmitUndefined<{
   [p in keyof T]: T[p] extends Column<infer R>
     ? R
     : T[p] extends object
     ? UnwrapColumns<T[p]>
     : never;
-};
+}>;
 
 export type JoinType = "inner" | "left";
 export type Joins<TName extends string = string, T1 = unknown, T2 = unknown> = {
@@ -293,6 +297,7 @@ export function createQuery<
       ): Columns<T> {
         return Object.keys(columns).reduce((acc, key) => {
           const x = columns[key as keyof typeof columns];
+
           if (x === undefined) return acc;
 
           if (isColumn(x)) {
@@ -454,6 +459,7 @@ export function asObject<TQuery extends Query<any, any, any>>(
   ): T {
     return Object.keys(columns).reduce((acc, key) => {
       const x = columns[key as keyof typeof columns];
+
       if (x === undefined) return acc;
 
       if (isColumn(x)) {

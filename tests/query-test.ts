@@ -23,8 +23,12 @@ export const selectQuery = from(accounts)
   .select((x) => ({
     id: x.id,
     todos: {
+      ...x.todos,
       id: x.todos.id,
       name: x.todos.title,
+      author_id: undefined,
+      modified_at: undefined,
+      title: undefined,
     },
     test: {
       id: x.todos2.id,
