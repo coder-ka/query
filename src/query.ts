@@ -293,6 +293,8 @@ export function createQuery<
       ): Columns<T> {
         return Object.keys(columns).reduce((acc, key) => {
           const x = columns[key as keyof typeof columns];
+          if (x === undefined) return acc;
+
           if (isColumn(x)) {
             return {
               ...acc,
@@ -418,6 +420,9 @@ function joinedColumns<TJoins extends Joins<string, unknown, unknown>>(
 ): JoinedColumns<TJoins> {
   return Object.keys(joins).reduce((acc, key) => {
     const join = joins[key as keyof typeof joins];
+
+    if (join === undefined) return acc;
+
     return {
       ...acc,
       [key]: join.rightAliased.columns,
@@ -449,6 +454,8 @@ export function asObject<TQuery extends Query<any, any, any>>(
   ): T {
     return Object.keys(columns).reduce((acc, key) => {
       const x = columns[key as keyof typeof columns];
+      if (x === undefined) return acc;
+
       if (isColumn(x)) {
         return {
           ...acc,
