@@ -46,6 +46,7 @@
   "homepage": "https://github.com/coder-ka/esbuild-ts-lib-starter#readme",
   "devDependencies": {
     "@coder-ka/prisma-query": "^1.0.0",
+    "@coder-ka/testing": "^1.0.0",
     "@types/assert": "^1.5.10",
     "@types/node": "^22.5.0",
     "@types/pg": "^8.11.8",

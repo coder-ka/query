@@ -1,6 +1,6 @@
 import assert from "assert";
 import { AsObject, asObject, AsRow } from "../src/main";
-import { test } from "./util";
+import { test } from "@coder-ka/testing";
 import { from, eq } from "../src/main";
 import { todos, accounts } from "./schema";
 

@@ -1,9 +1,9 @@
 import assert from "assert";
 import { postgresqlToSqlOptions, toSql } from "../src/main";
 import pg from "pg";
-import { test } from "./util";
+import { test } from "@coder-ka/testing";
 import { uuidv7 } from "uuidv7";
-import { selectQuery } from "./query-test";
+import { selectQuery } from "./query.test";
 
 export default [
   test("postgres connection.").do(async () => {
