@@ -2,8 +2,8 @@ This library is a schema-based, strongly-typed SQL builder.
 
 In most cases, the schema file should be generated from the Prisma schema file, but you can also write it yourself.
 
-- [Prisma generator for this library](https://www.npmjs.com/package/@coder-ka/prisma-query)
-- [Schema file example](https://github.com/coder-ka/query/blob/main/tests/test-db/schema.ts)
+- [Prisma generator for this library](https://github.com/coder-ka/prisma-query)
+- [Schema file example](https://github.com/coder-ka/query/blob/main/tests/schema.ts)
 
 ## Usage
 
