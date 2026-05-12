@@ -9,11 +9,11 @@ In most cases, the schema file should be generated from the Prisma schema file, 
 
 ```ts
 import { from, eq, toSql, asObject } from "@coder-ka/query";
-import { User, Todo } from "path/to/schema.ts";
+import { accounts, todos } from "path/to/schema.ts";
 
 // create query
-const query = from(User)
-  .innerJoin("todo", Todo, (u, t) => eq(u.id, t.author_id))
+const query = from(accounts)
+  .innerJoin("todo", todos, (u, t) => eq(u.id, t.author_id))
   .where((x, p) => eq(x.first_name, p("Jean")))
   .select((x) => ({
     id: x.id,
