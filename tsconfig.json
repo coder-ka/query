@@ -10,9 +10,11 @@
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "emitDeclarationOnly": true,
+    "rootDir": "./src",
     "declaration": true,
     "declarationMap": true,
     "declarationDir": "./types",
+    "types": ["node"],
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true
